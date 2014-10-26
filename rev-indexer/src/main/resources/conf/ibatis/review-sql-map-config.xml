@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+  <settings enhancementEnabled="false" lazyLoadingEnabled="false" useStatementNamespaces="true" />
+  <typeAlias alias="Pair" type="com.hcomemea.common.data.Pair" />
+  <typeHandler javaType="java.lang.Boolean" jdbcType="VARCHAR" callback="com.hcomemea.common.ibatis.typehandler.BooleanTypeHandler" />
+  <typeHandler javaType="java.util.Locale" callback="com.hcomemea.common.ibatis.typehandler.SimpleLocaleTypeHandler" />
+  <typeHandler javaType="com.hcomemea.possupport.website.Website" callback="com.hcomemea.possupport.common.ibatis.typehandler.WebsiteTypeHandler" />
+  <typeHandler javaType="com.hcomemea.possupport.pointofsale.PointOfSale" callback="com.hcomemea.possupport.common.ibatis.typehandler.PointOfSaleTypeHandler" />
+  <typeHandler javaType="java.util.Currency" callback="com.hcomemea.common.ibatis.typehandler.CurrencyTypeHandler" />
+  <typeHandler javaType="com.hcomemea.common.data.Price" callback="com.hotels.common.currency.ibatis.typehandler.PriceTypeHandler" />
+  <typeHandler javaType="com.hcomemea.common.hotel.data.HotelSupplier" callback="com.hcomemea.common.ibatis.typehandler.HotelSupplierTypeHandler" />
+  <typeHandler javaType="com.hcomemea.review.data.RatingAspect" callback="com.hcomemea.common.ibatis.typehandler.RatingAspectTypeHandler" />
+  <sqlMap resource="conf/ibatis/HotelReview.xml" />
+</sqlMapConfig>

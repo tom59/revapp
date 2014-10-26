@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+  <bean id="abstractInetPooledDatasource" class="com.inet.tds.PDataSource" abstract="true">
+    <property name="appname" value="DRS" />
+    <property name="initSQL" value="SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED" />
+    <property name="logging" value="#{T(org.slf4j.LoggerFactory).getLogger('java.sql').isDebugEnabled()}" />
+    <property name="queryTimeout" value="300" />
+    <property name="statusRequest" value="fast" />
+  </bean>
+
+  <bean id="readOnlyDataSource" parent="abstractInetPooledDatasource">
+    <property name="databaseName" value="${DB_READ_ONLY_CONNECTION_DATABASE_NAME}" />
+    <property name="serverName" value="${DB_READ_ONLY_CONNECTION_HOST}" />
+    <property name="instanceName" value="${DB_READ_ONLY_CONNECTION_INSTANCE_NAME}" />
+    <property name="port" value="${DB_READ_ONLY_CONNECTION_PORT}" />
+    <property name="user" value="${DB_READ_ONLY_CONNECTION_USER}" />
+    <property name="password" value="${DB_READ_ONLY_CONNECTION_PASSWORD}" />
+    <property name="initialPoolSize" value="${DB_READ_ONLY_CONNECTION_INITIAL_POOL_SIZE}" />
+    <property name="maxIdleTime" value="${DB_READ_ONLY_CONNECTION_MAX_IDLE_TIME}" />
+    <property name="maxPoolSize" value="${DB_READ_ONLY_CONNECTION_MAX_POOL_SIZE}" />
+    <property name="minPoolSize" value="${DB_READ_ONLY_CONNECTION_MIN_POOL_SIZE}" />
+  </bean>
+
+  <bean id="readOnlySqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+    <property name="dataSource" ref="readOnlyDataSource" />
+    <property name="configLocation" value="classpath:/conf/ibatis/review-sql-map-config.xml" />
+  </bean>
+
+  <bean class="com.hcomemea.common.component.ComponentInitializer">
+    <property name="components">
+      <list>
+        <bean class="com.hcomemea.rev.indexer.dao.DomainModelInitializer">
+          <property name="entityRegistry" ref="entityRegistry" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="entityRegistry" class="com.hcomemea.common.registry.EntityRegistryImpl">
+    <property name="entityDAOs">
+      <map>
+        <entry key="com.hcomemea.review.domain.HotelReview" value-ref="reviewDao" />
+      </map>
+    </property>
+  </bean>
+
+  <bean id="reviewDao" class="com.hcomemea.common.ibatis.daofactory.IbatisEntityDAOFactoryBean">
+    <property name="sqlMapClient" ref="readOnlySqlMapClient" />
+    <property name="interface" value="com.hcomemea.rev.indexer.dao.HotelReviewDao" />
+  </bean>
+</beans>

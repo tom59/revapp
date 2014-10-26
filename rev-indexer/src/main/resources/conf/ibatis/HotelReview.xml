@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="com.hcomemea.review.domain.HotelReview">
+  <typeAlias alias="HotelReview" type="com.hcomemea.review.domain.HotelReview" />
+  <resultMap id="hotelReviewResult" class="HotelReview">
+    <result property="id" column="hotelReview_id" />
+    <result property="hotelId" column="hotelReview_hotelId" />
+    <result property="firstName" column="hotelReview_firstName" />
+    <result property="lastInitial" column="hotelReview_lastInitial" />
+    <result property="displayName" column="hotelReview_displayName" />
+    <result property="city" column="hotelReview_city" />
+    <!--result property="rating" resultMap="com.hcomemea.common.hotel.domain.Hotel.hotelRatingResult" /-->
+    <result property="postedDate" column="hotelReview_postedDate" />
+    <result property="tipType" column="hotelReview_tipType" />
+    <result property="tipBody" column="hotelReview_tipBody" />
+    <result property="title" column="hotelReview_title" />
+    <result property="body" column="hotelReview_body" />
+    <result property="locale" column="hotelReview_localeCode" />
+    <result property="translatedLocale" column="hotelReview_translatedLocaleCode" />
+    <result property="ratingAspect" column="hotelReview_ratingAspect" />
+    <result property="hotelSupplier" column="hotelReview_supplierId" javaType="com.hcomemea.common.hotel.data.HotelSupplier" />
+    <result property="brandId" column="hotelReview_supplierId" />
+    <result property="hotelResponseTitle" column="hotelReview_hotelResponseTitle" />
+    <result property="hotelResponseBody" column="hotelReview_hotelResponseBody" />
+    <result property="hotelResponseName" column="hotelReview_hotelResponseName" />
+    <result property="hotelResponseDate" column="hotelReview_hotelResponseDate" />
+    <result property="status" column="hotelReview_status" />
+    <result property="checkInDate" column="hotelReview_checkInDate" jdbcType="DATE" />
+    <result property="stayDuration" column="hotelReview_stayDuration" />
+  </resultMap>
+  <resultMap class="Pair" id="translatedReviewResult">
+    <result property="left" column="hotelReview_id" javaType="java.lang.Long" />
+    <result property="right" resultMap="com.hcomemea.review.domain.HotelReview.hotelReviewResult" />
+  </resultMap>
+  <resultMap id="hotelRatingResult" class="com.hcomemea.common.hotel.data.HotelRating">
+    <result property="overall" column="hotelRating_overall" />
+    <result property="comfort" column="hotelRating_comfort" />
+    <result property="cleanliness" column="hotelRating_cleanliness" />
+    <result property="service" column="hotelRating_service" />
+    <result property="roomCondition" column="hotelRating_roomCondition" />
+    <result property="surroundingNeighbourhood" column="hotelRating_surroundingNeighbourhood" />
+    <result property="recommendedCount" column="hotelRating_recommendedCount" />
+    <result property="totalCount" column="hotelRating_recommendedTotal" />
+  </resultMap>
+  <select id="getReviewsByHotelIds" resultMap="hotelReviewResult">
+    select
+      hotelReview.GuestReviewID as hotelReview_id,
+      hotelReview.PropertyID as hotelReview_hotelId,
+      hotelReview.GuestFirstName as hotelReview_firstName,
+      hotelReview.GuestLastInitial as hotelReview_lastInitial,
+      hotelReview.GuestDisplayName as hotelReview_displayName,
+      hotelReview.GuestCity as hotelReview_city,
+      hotelReview.OverallSatisfaction as hotelRating_overall,
+      hotelReview.RoomComfort as hotelRating_comfort,
+      hotelReview.RoomCleanliness as hotelRating_cleanliness,
+      hotelReview.PropertyService as hotelRating_service,
+      hotelReview.PropertyCondition as hotelRating_roomCondition,
+      hotelReview.SurroundingNeighborhood as hotelRating_surroundingNeighbourhood,
+      hotelReview.Recommended as hotelRating_recommendedCount,
+      1 as hotelRating_recommendedTotal,
+      hotelReview.PostedDate as hotelReview_postedDate,
+      null as hotelReview_tipType,
+      null as hotelReview_tipBody,
+      hotelReview.ReviewTitle as hotelReview_title,
+      hotelReview.ReviewText as hotelReview_body,
+      locale.ISOLocaleCode as hotelReview_localeCode,
+      null as hotelReview_translatedLocaleCode,
+      hotelReview.BrandId as hotelReview_supplierId,
+      hotelReview.HotelResponseTitle as hotelReview_hotelResponseTitle,
+      hotelReview.HotelResponseBody as hotelReview_hotelResponseBody,
+      hotelReview.HotelResponseName as hotelReview_hotelResponseName,
+      hotelReview.HotelResponseDate as hotelReview_hotelResponseDate,
+      hotelReview.ratingAspect as hotelReview_ratingAspect,
+      hotelReview.Status as hotelReview_status,
+      hotelReview.CheckInDate as hotelReview_checkInDate,
+      hotelReview.StayDuration as hotelReview_stayDuration
+      from
+        HCOM_HOTEL_GUEST_REVIEWS hotelReview
+      inner join
+        HCOM_ISO_LOCALE as locale
+          on locale.ISOLocaleID = hotelReview.ISOLocaleID
+      where
+        hotelReview.Status in (1, 8) and
+        hotelReview.PropertyID in
+          <iterate property="hotelids" open="(" close=")" conjunction=",">
+             #hotelids[]#
+          </iterate>
+          and locale.ISOLocaleCode like 'en%' and hotelReview.ReviewText IS NOT NULL;
+  </select>
+</sqlMap>

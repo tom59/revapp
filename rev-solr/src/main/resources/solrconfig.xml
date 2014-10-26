@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+  <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
+
+  <luceneMatchVersion>LUCENE_36</luceneMatchVersion>
+
+  <dataDir>${solr.data.dir}</dataDir>
+
+  <directoryFactory name="DirectoryFactory"
+                    class="${solr.directoryFactory:solr.StandardDirectoryFactory}"/>
+
+  <indexConfig>
+    <writeLockTimeout>1000</writeLockTimeout>
+    <useCompoundFile>false</useCompoundFile>
+    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <mergeFactor>20</mergeFactor>
+    <lockType>native</lockType>
+    <unlockOnStartup>false</unlockOnStartup>
+    <reopenReaders>true</reopenReaders>
+    <deletionPolicy class="solr.SolrDeletionPolicy">
+      <str name="maxCommitsToKeep">1</str>
+      <str name="maxOptimizedCommitsToKeep">0</str>
+    </deletionPolicy>
+    <maxFieldLength>100000</maxFieldLength>
+    <infoStream file="INFOSTREAM.txt">false</infoStream>
+  </indexConfig>
+
+  <jmx />
+
+  <updateHandler class="solr.DirectUpdateHandler2">
+    <autoCommit>
+      <maxDocs>10000</maxDocs> <!-- maximum uncommited docs before autocommit triggered -->
+      <maxTime>600000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
+      <openSearcher>false</openSearcher>
+    </autoCommit>
+  </updateHandler>
+
+  <query>
+    <maxBooleanClauses>1024</maxBooleanClauses>
+    <documentCache class="solr.LRUCache" size="50000" initialSize="50000" autowarmCount="0"/>
+    <fieldValueCache class="solr.FastLRUCache" size="500" initialSize="500" autowarmCount="10"/>
+    <filterCache class="solr.LRUCache" size="500" initialSize="500" autowarmCount="10"/>
+    <queryResultCache class="solr.LRUCache" size="2500" initialSize="2500" autowarmCount="10"/>
+    <enableLazyFieldLoading>true</enableLazyFieldLoading>
+    <queryResultWindowSize>20</queryResultWindowSize>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+    <listener event="newSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+      </arr>
+    </listener>
+    <listener event="firstSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+        <lst>
+          <str name="q">static firstSearcher warming in solrconfig.xml</str>
+        </lst>
+      </arr>
+    </listener>
+    <useColdSearcher>false</useColdSearcher>
+    <maxWarmingSearchers>2</maxWarmingSearchers>
+  </query>
+
+  <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="true"
+                    multipartUploadLimitInKB="2048000" />
+    <httpCaching never304="true" />
+  </requestDispatcher>
+
+    <requestHandler name="/review" class="solr.SearchHandler" default="true">
+     <lst name="defaults">
+        <str name="defType">edismax</str>
+        <str name="echoParams">none</str>
+        <str name="group.cache.percent">100</str>
+        <str name="qf">review_content</str>
+        <str name="debugQuery">${solr.debug:false}</str>
+        <str name="lowercaseOperators">false</str>
+
+    </lst>
+  </requestHandler>
+
+  <requestHandler name="/update"
+                  class="solr.XmlUpdateRequestHandler">
+  </requestHandler>
+
+  <requestHandler name="/analysis/field"
+                  startup="lazy"
+                  class="solr.FieldAnalysisRequestHandler" />
+
+  <requestHandler name="/analysis/document"
+                  class="solr.DocumentAnalysisRequestHandler"
+                  startup="lazy" />
+
+  <requestHandler name="/admin/"
+                  class="solr.admin.AdminHandlers" />
+
+  <requestHandler name="/admin/luke" class="org.apache.solr.handler.admin.LukeRequestHandler" />
+
+  <!-- ping/healthcheck -->
+  <requestHandler name="/admin/ping" class="solr.PingRequestHandler">
+    <lst name="invariants">
+      <str name="qt">/review</str> <!-- handler to delegate to -->
+      <str name="q">solrpingquery</str>
+    </lst>
+    <lst name="defaults">
+      <str name="echoParams">all</str>
+    </lst>
+  </requestHandler>
+
+  <!-- Echo the request contents back to the client -->
+  <requestHandler name="/debug/dump" class="solr.DumpRequestHandler" >
+    <lst name="defaults">
+     <str name="echoParams">explicit</str>
+     <str name="echoHandler">true</str>
+    </lst>
+  </requestHandler>
+
+  <admin>
+    <defaultQuery>*:*</defaultQuery>
+  </admin>
+
+</config>

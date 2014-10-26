@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<schema name="example" version="1.4">
+<types>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
+    <!-- boolean type: "true" or "false" -->
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true" />
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0" />
+    <fieldType name="latLon" class="solr.LatLonType" subFieldType="double" />
+    <fieldType name="text_ngrams" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer class="solr.WhitespaceTokenizerFactory" />
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+            <filter class="solr.NGramFilterFactory" minGramSize="1" maxGramSize="25" />
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.WhitespaceTokenizerFactory" />
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+        </analyzer>
+    </fieldType>
+    <fieldType name="startsWith_ngram" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+            <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="25" />
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+        </analyzer>
+    </fieldType>
+    <fieldType name="wordStartsWith_ngram" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+            <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="25" />
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.ASCIIFoldingFilterFactory" />
+        </analyzer>
+    </fieldType>
+    <fieldType name="words" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory"
+            splitOnCaseChange="1"
+            splitOnNumerics="1"
+            generateWordParts="1"
+            stemEnglishPossessive="0"
+            generateNumberParts="0"
+            catenateWords="0"
+            catenateNumbers="0"
+            catenateAll="0"
+            preserveOriginal="0"/>
+         <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true"/>
+         <filter class="solr.PorterStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    <fieldtype name="stop_words" class="solr.TextField">
+       <analyzer>
+         <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+         <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true"/>
+       </analyzer>
+    </fieldtype>
+</types>
+
+    <fields>
+        <!-- Default Entity fields (Searchable for debugging purpose) -->
+        <field name="review_id" type="long" indexed="true" stored="true" omitNorms="true" />
+        <field name="hotel_id" type="long" indexed="true" stored="true" omitNorms="true" />
+        <field name="review_content" type="words" indexed="true" stored="true" />
+        <dynamicField name="semantic_score_*" type="double" indexed="true" stored="true"/>
+        <dynamicField name="semantic_count_*" type="int" indexed="true" stored="true"/>
+        <field name="type" type="string" indexed="true" stored="true"/>
+        <field name="destination_id" type="long" indexed="true" stored="true" omitNorms="true" />
+    </fields>
+
+    <solrQueryParser defaultOperator="AND" />
+</schema>
+
